@@ -246,12 +246,12 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     # @show minmaxsigma
     wake_treatment_strength = uns.remove_particles_strength( minmaxGamma[1]^2, minmaxGamma[2]^2; every_nsteps=1)
     wake_treatment_sigma = uns.remove_particles_sigma( minmaxsigma[1], minmaxsigma[2]; every_nsteps=1)
-    wake_treatment_sphere = uns.remove_particles_sphere(b^2, 1; Xoff=[b/4, 0, 0]) # radius is the span
+    wake_treatment_sphere = uns.remove_particles_sphere(b^2 * 100, 1; Xoff=[b/4, 0, 0]) # radius is the span
     remove_particles(args...; optargs...) = (wake_treatment_strength(args...; optargs...) ||
                                              wake_treatment_sigma(args...; optargs...) ||
                                              wake_treatment_sphere(args...; optargs...))
 
-    remove_particles(args...; optargs...) = false
+    # remove_particles(args...; optargs...) = false
 
 
     function runtime_function(PFIELD, T, DT; vprintln=(args...)->nothing)
