@@ -38,23 +38,25 @@ function build_ecrm_002(;
     wing = vlm.complexWing(b, AR, n, pos, clen, twist, sweep, dihed)
 
     # build rotors
-    rotor_starboard = uns.generate_rotor(rotor_file; pitch=pitch,
-        n=n_ccb, blade_r=blade_r, CW=CW_starboard, ReD=ReD,
-        verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
-        data_path=data_path, plot_disc=false)
-    rotor_port = uns.generate_rotor(rotor_file; pitch=pitch,
-        n=n_ccb, blade_r=blade_r, CW=!CW_starboard, ReD=ReD,
-        verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
-        data_path=data_path, plot_disc=false)
-    this_O = [b/2 * tand(sweep[1]) - clen[end], b/2, b/2 * tand(dihed[1])]
-    this_Oaxis = [
-        1.0 0 0
-        0 1 0
-        0 0 1
-    ]
-    vlm.setcoordsystem(rotor_starboard, this_O, this_Oaxis; user=true)
-    vlm.setcoordsystem(rotor_port, this_O .* [1,-1,1], this_Oaxis; user=true)
-    rotors = [rotor_starboard,rotor_port]
+    if add_rotors
+        rotor_starboard = uns.generate_rotor(rotor_file; pitch=pitch,
+            n=n_ccb, blade_r=blade_r, CW=CW_starboard, ReD=ReD,
+            verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+            data_path=data_path, plot_disc=false)
+        rotor_port = uns.generate_rotor(rotor_file; pitch=pitch,
+            n=n_ccb, blade_r=blade_r, CW=!CW_starboard, ReD=ReD,
+            verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+            data_path=data_path, plot_disc=false)
+        this_O = [b/2 * tand(sweep[1]) - clen[end], b/2, b/2 * tand(dihed[1])]
+        this_Oaxis = [
+            1.0 0 0
+            0 1 0
+            0 0 1
+        ]
+        vlm.setcoordsystem(rotor_starboard, this_O, this_Oaxis; user=true)
+        vlm.setcoordsystem(rotor_port, this_O .* [1,-1,1], this_Oaxis; user=true)
+        rotors = [rotor_starboard,rotor_port]
+    end
 
     # # Position of main wing
     # O_w = [l_pos_w + x_off_w, 0, h_pos_w]
@@ -114,10 +116,11 @@ function build_ecrm_002(;
         )
 end
 
-function ecrm_002_maneuver()
+function ecrm_002_maneuver(; add_rotors=true)
     angle(t) = [0.0,0,0]
     RPM(t) = 1.0
     Vvehicle(t) = [0.0,0,0]
     anglevehicle(t) = [0.0,0,0]
-    uns.KinematicManeuver((), (RPM,), Vvehicle, anglevehicle)
+    rpm_sys = add_rotors ? (RPM,) : ()
+    uns.KinematicManeuver((), rpm_sys, Vvehicle, anglevehicle)
 end

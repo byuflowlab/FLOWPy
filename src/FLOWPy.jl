@@ -3,8 +3,9 @@ module FLOWPy
 import FLOWUnsteady as uns
 vlm = uns.vlm
 vpm = uns.vpm
+using HDF5
 
-for filename in ["build_ecrm_002", "vpmdata", "step_vpm"]
+for filename in ["build_ecrm_002", "vpmdata", "step_vpm", "update_ecrm_002", "write_history"]
 	include(filename*".jl")
 end
 

@@ -1,4 +1,4 @@
-function step_vpm(vpmdata, vinf, alpha_rad)
+function step_vpm(vpmdata, vinf, alpha_rad; save_file=false)
     # unpack simulation struct
     nsteps = vpmdata.nsteps
     simulation = vpmdata.simulation
@@ -65,5 +65,11 @@ function step_vpm(vpmdata, vinf, alpha_rad)
         data_history["cd"][:,i_step-1] .= simulation.vehicle.system.wings[1].sol["cd"]
         data_history["CL"][i_step-1] = simulation.vehicle.system.wings[1].sol["CLwing"]
         data_history["CD"][i_step-1] = simulation.vehicle.system.wings[1].sol["CDwing"]
+    end
+
+    # save to file
+    if save_file
+        println("Saving file...")
+        write_history_h5(run_name*"_history.h5", vpmdata)
     end
 end

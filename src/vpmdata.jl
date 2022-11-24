@@ -23,6 +23,9 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         Vref = 67.0, # initial value
         rpm = 1800.0, # initial value
         sound_spd=343,             # (m/s) speed of sound
+        add_rotors=true,
+        VehicleType=uns.VLMVehicle,
+        n=10, n_ccb=10,
         rho=1.225,                 # (kg/m^3) air density
         # SOLVERS OPTIONS
         p_per_step=5,              # Particle sheds per time step
@@ -58,13 +61,12 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         restart_vpmfile=nothing,   # VPM particle field restart file
         restart_nsteps=100,
         # OUTPUT OPTIONS
-        save_path="",
         run_name="FLOWUnsteadyPy",
         verbose=true, v_lvl=0, verbose_nsteps=10,
         debug=false,               # Output extra states for debugging
         nsteps_save=1,             # Save vtks every this many steps
         save_horseshoes=false,     # Save VLM horseshoes
-        save_static_particles=true,# Whether to save particles to represent the VLM
+        save_static_particles=false,# Whether to save particles to represent the VLM
         save_wopwopin=false,        # Generate inputs for PSU-WOPWOP
         L_dir=[0,0,1],      # Direction of lift component
         D_dir=[-1,0,0],      # Direction of drag component
@@ -86,18 +88,20 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
 
         debug_forces                = false,      # Force calculations will output intermediate fields if true
     )
+
+    save_path=run_name
         
     #####
     ##### build simulation
     #####
-    vehicle = build_ecrm_002(; data_path)
+    vehicle = build_ecrm_002(; data_path, add_rotors, VehicleType, n, n_ccb)
     wing = vehicle.system.wings[1]
     b = wing._ywingdcr[end] - wing._ywingdcr[1]
     S_ref = 10.48
 
     y2b = 2*[vlm.getControlPoint(wing, i)[2] for i in 1:vlm.get_m(wing)]/b
 
-    maneuver = ecrm_002_maneuver()
+    maneuver = ecrm_002_maneuver(; add_rotors)
 
     Vinf(x,t) = Vref.*[1.0,0,0] # update this when running
     dt = duration/nsteps
@@ -110,7 +114,11 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         Vinit=Vinit, Winit=Winit)
         
     # options
-    R = vehicle.rotor_systems[1][1]._wingsystem.wings[1]._yn[end]
+    if add_rotors
+        R = vehicle.rotor_systems[1][1]._wingsystem.wings[1]._yn[end]
+    else
+        R = 1.0
+    end
     lambda = 1.2*2.125
     sigma_vpm_overwrite = lambda * (2*pi*rpm/60*R + Vref)*dt / p_per_step   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
     sigma_vlm_surf=R/50         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
@@ -140,15 +148,16 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     end
 
     # Initiate particle field
+    rotor_n = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings[1]._xn) : 0
     shed_locations = 2 * length(vehicle.system.wings[1]._xn) +
-    2 * 5 * length(vehicle.rotor_systems[1][1]._wingsystem.wings[1]._xn)
+    2 * 5 * rotor_n
     nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
     max_particles = shed_locations * nsteps_mp * p_per_step * 20
     
     # static particles
-    n_blades = length(vehicle.rotor_systems[1][1]._wingsystem.wings)
-    n_rotors = length(vehicle.rotor_systems[1])
-    n_vlm_rotor = length(vehicle.rotor_systems[1][1]._wingsystem.wings[1]._xn)
+    n_blades = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings) : 0
+    n_rotors = add_rotors ? length(vehicle.rotor_systems[1]) : 0
+    n_vlm_rotor = rotor_n
     max_static_particles = (uns._get_m_static(vehicle) + n_vlm_rotor * n_blades * n_rotors)*20
     # @show max_static_particles
     vpm_solver = [
@@ -260,6 +269,8 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         uns.nextstep_kinematic(sim, dt)
 
         Vinf = (x,t) -> PFIELD.Uinf(t)
+
+        @show Vinf(rand(3),0.03)
 
         # Solver-specific pre-calculations
         uns.precalculations(sim, Vinf, PFIELD, T, DT)
@@ -373,7 +384,8 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         "cl" => cl_history,
         "cd" => cd_history,
         "CL" => CL_history,
-        "CD" => CD_history
+        "CD" => CD_history,
+        "y2b" => y2b
     )
 
     vpmdata = VPMData(nsteps, sim, pfield, static_particles_function, runtime_function, S_ref, b, y2b, run_name, save_path, nsteps_save, save_time, v_lvl, verbose_nsteps, data_history)
