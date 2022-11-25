@@ -19,7 +19,7 @@ end
 function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         # data_path="/home/ryan/.julia/dev/FLOWUnsteady/data/", # contains two subdirectories: 
         #                                                        # rotors/ and airfoils/ 
-        data_path=joinpath(dirname(pathof(uns)), "..", "data"),
+        data_path=joinpath(dirname(pathof(uns)), "..", "data/"),
         # SIMULATION OPTIONS
         Vref = 67.0, # initial value
         rpm = 1800.0, # initial value
@@ -270,7 +270,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         uns.nextstep_kinematic(sim, dt)
 
         Vinf = (x,t) -> PFIELD.Uinf(t)
-        
+
         # Solver-specific pre-calculations
         uns.precalculations(sim, Vinf, PFIELD, T, DT)
 
