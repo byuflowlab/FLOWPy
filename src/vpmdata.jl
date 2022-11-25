@@ -270,9 +270,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         uns.nextstep_kinematic(sim, dt)
 
         Vinf = (x,t) -> PFIELD.Uinf(t)
-
-        @show Vinf(rand(3),0.03)
-
+        
         # Solver-specific pre-calculations
         uns.precalculations(sim, Vinf, PFIELD, T, DT)
 

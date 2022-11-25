@@ -2,7 +2,6 @@ function write_history_h5(filename, vpmdata)
     data_history = vpmdata.data_history
     h5open(filename, "w") do io
         for this_key in keys(data_history)
-            @show this_key
             this_data = data_history[this_key]
             write(io, this_key, this_data)
         end
@@ -19,8 +18,3 @@ function read_history_h5(filename)
     end
     return this_data
 end
-
-# # test
-# write_history_h5("test.h5", vpmdata)
-
-# stuff = read_history_h5("test.h5")
