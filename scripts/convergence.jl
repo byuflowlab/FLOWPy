@@ -5,7 +5,8 @@ function run_ecrm2(;
         dt = 0.001, # approximately
         add_rotors=true,
         n=10, n_ccb=10,
-        nrevs=1/5*80
+        nrevs=1/5*80,
+        p_per_step=5
     )
     # prep restart file
     rpm = 1800.0

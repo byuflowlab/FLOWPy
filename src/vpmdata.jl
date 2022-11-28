@@ -26,7 +26,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         sound_spd=343,             # (m/s) speed of sound
         add_rotors=true,
         VehicleType=uns.VLMVehicle,
-        n=10, n_ccb=10,
+        n=20, n_ccb=20,
         rho=1.225,                 # (kg/m^3) air density
         # SOLVERS OPTIONS
         p_per_step=5,              # Particle sheds per time step
@@ -60,7 +60,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
         # RESTART OPTIONS
         restart_vpmfile=nothing,   # VPM particle field restart file
-        restart_nsteps=100,
+        restart_nsteps=300,
         # OUTPUT OPTIONS
         run_name="FLOWUnsteadyPy",
         verbose=true, v_lvl=0, verbose_nsteps=10,
@@ -155,12 +155,12 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     n_vlm_rotor = rotor_n
     n_vlm_wing = 2 * length(vehicle.system.wings[1]._xn) + 1
     max_static_particles = n_vlm_rotor * n_blades * n_rotors + n_vlm_wing
-    # @show max_static_particles
 
     # Initiate particle field
     shed_locations = max_static_particles
     nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
     max_particles = shed_locations * nsteps_mp * p_per_step + max_static_particles
+    @show max_static_particles max_particles
     vpm_solver = [
                     (:formulation, vpm_formulation),
                     (:viscous, vpm_viscous),
