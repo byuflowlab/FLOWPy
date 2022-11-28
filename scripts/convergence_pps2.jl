@@ -1,5 +1,6 @@
-# p per step
+include("convergence.jl")
 
+# p per step
 run_ecrm2(;
     alpha_deg = 6.0,
     dt = 0.001, # approximately
