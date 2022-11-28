@@ -17,8 +17,8 @@ struct VPMData{TF}
 end
 
 function VPMData(nsteps, duration; # Note: dt = duration/nsteps
-        # data_path="/home/ryan/.julia/dev/FLOWUnsteady/data/", # contains two subdirectories: 
-        #                                                        # rotors/ and airfoils/ 
+        # data_path="/home/ryan/.julia/dev/FLOWUnsteady/data/", # contains two subdirectories:
+        #                                                        # rotors/ and airfoils/
         data_path=joinpath(dirname(pathof(uns)), "..", "data/"),
         # SIMULATION OPTIONS
         Vref = 67.0, # initial value
@@ -91,7 +91,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     )
 
     save_path=run_name
-        
+
     #####
     ##### build simulation
     #####
@@ -110,10 +110,10 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
     Winit = pi/180 * (maneuver.anglevehicle(0+1e-12)-
         maneuver.anglevehicle(0))/(duration*1e-12) # (rad/s) initial vehicle angular velocity
-    
+
     sim = uns.Simulation(vehicle, maneuver, Vref, rpm, duration;
         Vinit=Vinit, Winit=Winit)
-        
+
     # options
     if add_rotors
         R = vehicle.rotor_systems[1][1]._wingsystem.wings[1]._yn[end]
@@ -148,19 +148,19 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         end
     end
 
-    # Initiate particle field
-    rotor_n = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings[1]._xn) : 0
-    shed_locations = 2 * length(vehicle.system.wings[1]._xn) +
-    2 * 5 * rotor_n
-    nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
-    max_particles = shed_locations * nsteps_mp * p_per_step * 20
-    
     # static particles
+    rotor_n = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings[1]._xn) : 0
     n_blades = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings) : 0
     n_rotors = add_rotors ? length(vehicle.rotor_systems[1]) : 0
     n_vlm_rotor = rotor_n
-    max_static_particles = (uns._get_m_static(vehicle) + n_vlm_rotor * n_blades * n_rotors)*20
+    n_vlm_wing = 2 * length(vehicle.system.wings[1]._xn) + 1
+    max_static_particles = n_vlm_rotor * n_blades * n_rotors + n_vlm_wing
     # @show max_static_particles
+
+    # Initiate particle field
+    shed_locations = max_static_particles
+    nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
+    max_particles = shed_locations * nsteps_mp * p_per_step + max_static_particles
     vpm_solver = [
                     (:formulation, vpm_formulation),
                     (:viscous, vpm_viscous),
@@ -174,15 +174,16 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
                  ]
     Xdummy = zeros(3)
     pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
-                                                                  vpm_solver...)
+                vpm_solver...)
+
+    staticpfield = vpm.ParticleField(max_static_particles; Uinf=t->Vinf(Xdummy, t),
+                vpm_solver...)
+
     # Save settings
     vpm.save_settings(pfield, run_name; path=save_path)
     if restart_vpmfile!=nothing
         vpm.read!(pfield, restart_vpmfile; overwrite=true, load_time=false)
     end
-
-    staticpfield = vpm.ParticleField(max_static_particles; Uinf=t->Vinf(Xdummy, t),
-                                                                  vpm_solver...)
 
     if vpm_surface
         static_particles_function = uns.generate_static_particle_fun(pfield, staticpfield,
@@ -325,7 +326,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
-            
+
             # Force per unit span at each VLM element
             ftot = calc_forces(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho; t=PFIELD.t, per_unit_span=true,
