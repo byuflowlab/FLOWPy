@@ -159,6 +159,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     # Initiate particle field
     shed_locations = max_static_particles
     nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
+    if nsteps_mp > 350; nsteps_mp = 350; end
     max_particles = shed_locations * nsteps_mp * p_per_step + max_static_particles
     @show max_static_particles max_particles
     vpm_solver = [
