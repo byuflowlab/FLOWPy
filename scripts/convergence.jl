@@ -20,6 +20,7 @@ function run_ecrm2(;
     vpmdata = fp.VPMData(nsteps, duration; restart_vpmfile, add_rotors, run_name, n, n_ccb, p_per_step)
 
     # fp.update_ecrm_002(vpmdata, data_list)
+    println("Running $(run_name):")
 
     for i in 0:nsteps
         save_file = i == nsteps ? true : false

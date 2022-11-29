@@ -12,7 +12,7 @@ function step_vpm(vpmdata, vinf, alpha_rad; save_file=false)
     v_lvl = vpmdata.v_lvl
     verbose_nsteps = vpmdata.verbose_nsteps
     data_history = vpmdata.data_history
-    
+
     i_step = simulation.nt
     dt = simulation.ttot / nsteps
 
@@ -69,7 +69,7 @@ function step_vpm(vpmdata, vinf, alpha_rad; save_file=false)
 
     # save to file
     if save_file
-        println("Saving file...")
+        println("Saving file $(run_name*"_history.h5")...")
         write_history_h5(run_name*"_history.h5", vpmdata)
     end
 end
