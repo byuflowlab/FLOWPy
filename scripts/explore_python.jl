@@ -12,7 +12,7 @@ vinf = 67.0 # m/s
 alpha_rad = 10.0 * 3.1415926/180.0 # aoa in radians
 restart_vpmfile = nothing
 run_name="FLOWUnsteadyPy"
-vpmdata = fp.VPMData(nsteps, duration; restart_vpmfile, add_rotors=false, run_name)
+vpmdata = fp.VPMData(nsteps, duration; restart_vpmfile, add_rotors=true, run_name)
 
 # fp.update_ecrm_002(vpmdata, data_list)
 
