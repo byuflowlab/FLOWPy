@@ -30,7 +30,7 @@ function build_ecrm_002(;
     v_lvl=1,
     verbose=true,
     xfoil=false,
-    data_path="/home/ryan/.julia/dev/FLOWUnsteady/data/"
+    data_path=joinpath(dirname(pathof(uns)), "..", "data/"),
 )
 
 
