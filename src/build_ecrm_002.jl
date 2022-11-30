@@ -19,9 +19,9 @@ function build_ecrm_002(;
     add_rotors=true,
     CW_starboard = false,
     n_ccb=10,
-    blade_r=b/2 * tand(-sweep[1]),
+    blade_r=1.0,
     pitch=0,
-    ReD=rho*sqrt(vinf^2 + (rpm*2*pi/60*blade_r)^2)*blade_r/10 / mu,
+    ReD=rho*sqrt(vinf^2 + (rpm*2*pi/60*1.526)^2)*1.526/10 / mu,
     rotor_file="uber_ecrm002.csv",
     # rotor_file="/home/ryan/.julia/dev/FLOWUnsteady/data/rotors/uber_ecrm002.csv"
     # vehicle parameters
