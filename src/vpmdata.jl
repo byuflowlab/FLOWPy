@@ -259,17 +259,18 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     wake_treatment_strength = uns.remove_particles_strength( minmaxGamma[1]^2, minmaxGamma[2]^2; every_nsteps=1)
     wake_treatment_sigma = uns.remove_particles_sigma( minmaxsigma[1], minmaxsigma[2]; every_nsteps=1)
 
-    b = 10.67
+    b = 10.64
     gamma = 9 * pi / 180
     ctip = 0.819
     dx_cutoff_f = add_rotors ? 1.06 : 1.2 # vinf = 67, RPM = 1800, eCRM-002, main wing
-    xrotor = ctip + b/2 * tan(gamma)
+    swept_b2 = (1-0.099) * b/2
+    xrotor = ctip + swept_b2 * tan(gamma)
     Rrotor = 1.525950
     dx_cutoff = dx_cutoff_f*b
-    width_rect = dx_cutoff + ctip + b/2*tan(gamma) + 2*xrotor
+    width_rect = dx_cutoff + croot + 2*ctip + swept_b2 * tan(gamma)
     height_rect = 2*Rrotor + b/2
     Rcutoff = sqrt((width_rect/2)^2 + height_rect^2)
-    xcenter = width_rect/2 - b/2*tan(gamma) - 2*xrotor
+    xcenter = width_rect/2 - (2*ctip + swept_b2 * tan(gamma))
 
     wake_treatment_sphere = uns.remove_particles_sphere(Rcutoff^2, 1; Xoff=[xcenter, 0, 0]) # radius is the span
     remove_particles(args...; optargs...) = (wake_treatment_strength(args...; optargs...) ||

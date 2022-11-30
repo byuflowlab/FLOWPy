@@ -7,14 +7,14 @@ function build_ecrm_002(;
     mu=1.789e-5,
     # wing parameters
     add_wings=true,
-    b = 10.67,
-    AR = b^2/10.48,
+    b = 10.64,
+    AR = b^2/(10.48 + 10.64*0.099*1.149),
     n = 10,
-    pos = [0,1.0],
-    clen = [1.147, 0.819],
-    twist = [0.0,1],
-    sweep = [-9.0],
-    dihed = [6.0],
+    pos = [0,0.099,1.0],
+    clen = [1.149, 1.149, 0.819],
+    twist = [0.0,0,1],
+    sweep = [0,-9.0],
+    dihed = [0,6.0],
     # rotor parameters
     add_rotors=true,
     CW_starboard = false,
@@ -47,7 +47,8 @@ function build_ecrm_002(;
             n=n_ccb, blade_r=blade_r, CW=!CW_starboard, ReD=ReD,
             verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
             data_path=data_path, plot_disc=false)
-        this_O = [b/2 * tand(sweep[1]) - clen[end], b/2, b/2 * tand(dihed[1])]
+        swept_b2 = (pos[end]-pos[end-1]) * b/2
+        this_O = [swept_b2 * tand(sweep[end]) - clen[end], b/2, swept_b2 * tand(dihed[end])]
         this_Oaxis = [
             1.0 0 0
             0 1 0
