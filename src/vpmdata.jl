@@ -262,6 +262,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     b = 10.64
     gamma = 9 * pi / 180
     ctip = 0.819
+    croot = 1.149
     dx_cutoff_f = add_rotors ? 1.06 : 1.2 # vinf = 67, RPM = 1800, eCRM-002, main wing
     swept_b2 = (1-0.099) * b/2
     xrotor = ctip + swept_b2 * tan(gamma)
