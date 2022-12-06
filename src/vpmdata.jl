@@ -91,6 +91,11 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     )
 
     save_path=run_name
+    if add_rotors=="true"
+        add_rotors = true
+    elseif add_rotors=="false"
+        add_rotors = false
+    end
 
     #####
     ##### build simulation
