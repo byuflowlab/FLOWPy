@@ -179,7 +179,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     Rcutoff = sqrt((width_rect/2)^2 + height_rect^2)
     xcenter = width_rect/2 - (2*ctip + swept_b2 * tan(gamma))
 
-    nsteps_crit = Int(round(dx_cutoff/67.0/dt * 1.2))
+    nsteps_crit = Int(round(dx_cutoff/67.0/dt * 1.35))
     nsteps_crit_restart_001 = 350
     nsteps_crit = max(nsteps_crit, nsteps_crit_restart_001)
     if nsteps_mp > nsteps_crit; nsteps_mp = nsteps_crit; end
