@@ -60,7 +60,9 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
         # RESTART OPTIONS
         restart_vpmfile=nothing,   # VPM particle field restart file
-        restart_nsteps=300,
+        restart_dt=0.001,
+        restart_n=20,
+        restart_nr=20,
         # OUTPUT OPTIONS
         run_name="FLOWUnsteadyPy",
         verbose=true, v_lvl=0, verbose_nsteps=10,
@@ -90,12 +92,6 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         debug_forces                = false,      # Force calculations will output intermediate fields if true
     )
 
-    save_path=run_name
-    if add_rotors=="true"
-        add_rotors = true
-    elseif add_rotors=="false"
-        add_rotors = false
-    end
 
     #####
     ##### build simulation
@@ -159,11 +155,10 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     n_rotors = add_rotors ? length(vehicle.rotor_systems[1]) : 0
     wing_n = n * 2
     n_wings = 2
-    shed_locations = blade_n * n_blades * n_rotors + wing_n * n_wings
+    shed_locations = blade_n * n_blades * n_rotors * 3 + wing_n * n_wings * 3
     max_static_particles = shed_locations
 
     # Initiate particle field
-    nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
 
     b = 10.64
     gamma = 9 * pi / 180
@@ -180,10 +175,15 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     xcenter = width_rect/2 - (2*ctip + swept_b2 * tan(gamma))
 
     nsteps_crit = Int(round(dx_cutoff/67.0/dt * 1.35))
-    nsteps_crit_restart_001 = 350
-    nsteps_crit = max(nsteps_crit, nsteps_crit_restart_001)
-    if nsteps_mp > nsteps_crit; nsteps_mp = nsteps_crit; end
-    max_particles = shed_locations * nsteps_mp * p_per_step + max_static_particles
+    max_particles = shed_locations * nsteps_crit * p_per_step + max_static_particles
+
+    # for restart file
+    if !(restart_vpmfile == nothing)
+        nsteps_crit_restart = Int(round(dx_cutoff/67.0/restart_dt * 1.35))
+        shed_locations_restart = restart_n * 2 * 3 + restart_nr * 5 * 2 * 3
+        restart_max_particles = shed_locations_restart * nsteps_crit_restart * p_per_step_restart + shed_locations_restart
+        max_particles = maximum(restart_max_particles, max_particles)
+    end
     @show max_static_particles max_particles
     vpm_solver = [
                     (:formulation, vpm_formulation),
@@ -204,6 +204,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
                 vpm_solver...)
 
     # Save settings
+    save_path=run_name
     vpm.save_settings(pfield, run_name; path=save_path)
     if restart_vpmfile!=nothing
         vpm.read!(pfield, restart_vpmfile; overwrite=true, load_time=false)
