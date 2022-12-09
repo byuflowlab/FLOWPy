@@ -16,7 +16,7 @@ function run_ecrm2(;
     vinf = 67.0 # m/s
     alpha_rad = alpha_deg * 3.1415926/180.0 # aoa in radians
     restart_vpmfile = nothing
-    run_name="a$(Int(ceil(alpha_deg)))_dt$(round(dt; digits=3))_n$(n)_nr$(n_ccb)_rotors$(add_rotors)_pps$(p_per_step)"
+    run_name="a$(Int(ceil(alpha_deg)))_dt$(round(dt; digits=5))_n$(n)_nr$(n_ccb)_rotors$(add_rotors)_pps$(p_per_step)"
     vpmdata = fp.VPMData(nsteps, duration; restart_vpmfile, add_rotors, run_name, n, n_ccb, p_per_step)
 
     # fp.update_ecrm_002(vpmdata, data_list)
