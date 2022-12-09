@@ -150,10 +150,10 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     end
 
     # static particles
-    blade_n = add_rotors ? n_ccb * 2 : 0
+    blade_n = add_rotors ? n_ccb : 0
     n_blades = add_rotors ? length(vehicle.rotor_systems[1][1]._wingsystem.wings) : 0
     n_rotors = add_rotors ? length(vehicle.rotor_systems[1]) : 0
-    wing_n = n * 2
+    wing_n = n
     n_wings = 2
     shed_locations = blade_n * n_blades * n_rotors * 3 + wing_n * n_wings * 3
     max_static_particles = shed_locations
