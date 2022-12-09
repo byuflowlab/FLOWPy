@@ -164,7 +164,25 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
 
     # Initiate particle field
     nsteps_mp = restart_vpmfile!=nothing ? nsteps + restart_nsteps : nsteps
-    if nsteps_mp > 350; nsteps_mp = 350; end
+
+    b = 10.64
+    gamma = 9 * pi / 180
+    ctip = 0.819
+    croot = 1.149
+    dx_cutoff_f = add_rotors ? 1.06 : 1.2 # vinf = 67, RPM = 1800, eCRM-002, main wing
+    swept_b2 = (1-0.099) * b/2
+    xrotor = ctip + swept_b2 * tan(gamma)
+    Rrotor = 1.525950
+    dx_cutoff = dx_cutoff_f*b
+    width_rect = dx_cutoff + croot + 2*ctip + swept_b2 * tan(gamma)
+    height_rect = 2*Rrotor + b/2
+    Rcutoff = sqrt((width_rect/2)^2 + height_rect^2)
+    xcenter = width_rect/2 - (2*ctip + swept_b2 * tan(gamma))
+
+    nsteps_crit = Int(round(dx_cutoff/67.0/dt * 1.2))
+    nsteps_crit_restart_001 = 350
+    nsteps_crit = max(nsteps_crit, nsteps_crit_restart_001)
+    if nsteps_mp > nsteps_crit; nsteps_mp = nsteps_crit; end
     max_particles = shed_locations * nsteps_mp * p_per_step + max_static_particles
     @show max_static_particles max_particles
     vpm_solver = [
