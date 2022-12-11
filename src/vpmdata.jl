@@ -63,6 +63,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         restart_dt=0.001,
         restart_n=20,
         restart_nr=20,
+        restart_pps=5,
         # OUTPUT OPTIONS
         run_name="FLOWUnsteadyPy",
         verbose=true, v_lvl=0, verbose_nsteps=10,
@@ -181,7 +182,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
     if !(restart_vpmfile == nothing)
         nsteps_crit_restart = Int(round(dx_cutoff/67.0/restart_dt * 1.35))
         shed_locations_restart = restart_n * 2 * 3 + restart_nr * 5 * 2 * 3
-        restart_max_particles = shed_locations_restart * nsteps_crit_restart * p_per_step_restart + shed_locations_restart
+        restart_max_particles = shed_locations_restart * nsteps_crit_restart * restart_pps + shed_locations_restart
         max_particles = maximum(restart_max_particles, max_particles)
     end
     @show max_static_particles max_particles
