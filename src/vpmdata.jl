@@ -183,8 +183,7 @@ function VPMData(nsteps, duration; # Note: dt = duration/nsteps
         nsteps_crit_restart = Int(round(dx_cutoff/67.0/restart_dt * 1.35))
         shed_locations_restart = restart_n * 2 * 3 + restart_nr * 5 * 2 * 3
         restart_max_particles = shed_locations_restart * nsteps_crit_restart * restart_pps + shed_locations_restart
-        @show restart_max_particles max_particles
-        max_particles = maximum(restart_max_particles, max_particles)
+        max_particles = max(restart_max_particles, max_particles)
     end
     @show max_static_particles max_particles
     vpm_solver = [
